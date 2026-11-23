@@ -1,0 +1,68 @@
+# Material Library for Vision UGV Rover
+
+newmtl ChassisDarkGray
+Kd 0.22 0.24 0.26
+Ks 0.4 0.4 0.4
+Ns 45.0
+illum 2
+
+newmtl AluminumPlate
+Kd 0.76 0.78 0.80
+Ks 0.8 0.8 0.8
+Ns 90.0
+illum 2
+
+newmtl ElectronicsEnclosure
+Kd 0.12 0.13 0.15
+Ks 0.3 0.3 0.3
+Ns 30.0
+illum 2
+
+newmtl SafetyYellow
+Kd 0.95 0.75 0.05
+Ks 0.5 0.5 0.5
+Ns 50.0
+illum 2
+
+newmtl AntennaBlack
+Kd 0.05 0.05 0.05
+Ks 0.6 0.6 0.6
+Ns 70.0
+illum 2
+
+newmtl SensorMast
+Kd 0.15 0.15 0.15
+Ks 0.7 0.7 0.7
+Ns 80.0
+illum 2
+
+newmtl CameraBody
+Kd 0.08 0.45 0.88
+Ks 0.7 0.7 0.8
+Ns 75.0
+illum 2
+
+newmtl CameraLens
+Kd 0.02 0.02 0.03
+Ks 0.95 0.95 0.95
+Ns 150.0
+illum 2
+
+newmtl HeadlightGlass
+Kd 0.95 0.95 0.90
+Ks 0.9 0.9 0.9
+Ns 120.0
+illum 2
+d 0.85
+
+newmtl DarkRubber
+Kd 0.09 0.09 0.10
+Ks 0.1 0.1 0.1
+Ns 10.0
+illum 2
+
+newmtl WheelHubOrange
+Kd 0.92 0.42 0.06
+Ks 0.6 0.6 0.6
+Ns 60.0
+illum 2
