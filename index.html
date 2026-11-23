@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vision UGV — Autonomous Ground Navigation Model</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js for 3D Rover Simulation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <!-- TOP NAVBAR -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">VISION UGV STUDIO</h1>
+        <p class="brand-subtitle">Autonomous Outdoor Ground Navigation &bull; Computer Vision Working Model</p>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <!-- Day / Night Mode Toggle -->
+      <button class="theme-switch-btn" id="btn-theme-toggle" title="Toggle Day / Night Mode">
+        <span class="theme-icon" id="theme-icon">☀️</span>
+        <span class="theme-text" id="theme-text">Day Mode</span>
+      </button>
+
+      <div class="status-pill connected" id="connection-status">
+        <span class="status-dot"></span>
+        <span id="connection-text">SYSTEM READY</span>
+      </div>
+
+      <div class="telemetry-chip">
+        <span class="chip-label">FPS</span>
+        <span class="chip-val" id="header-fps">83.0</span>
+      </div>
+
+      <div class="telemetry-chip">
+        <span class="chip-label">STATE</span>
+        <span class="chip-val state-val" id="header-state">PATH_FOUND</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="app-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-label">MODEL MODULES</div>
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="tab-vision">
+          <span class="nav-icon">🎥</span>
+          <div class="nav-text">
+            <span class="nav-title">1. Vision Navigation</span>
+            <span class="nav-desc">Live Synchronized Tri-Stream</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-tab="tab-twin">
+          <span class="nav-icon">🤖</span>
+          <div class="nav-text">
+            <span class="nav-title">2. 3D Rover Simulation</span>
+            <span class="nav-desc">Interactive WebGL & Sensor FOV</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-tab="tab-methodology">
+          <span class="nav-icon">🔬</span>
+          <div class="nav-text">
+            <span class="nav-title">3. Perception Pipeline</span>
+            <span class="nav-desc">CV Stages & Live Tuner</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-tab="tab-eda">
+          <span class="nav-icon">📈</span>
+          <div class="nav-text">
+            <span class="nav-title">4. Dataset & EDA</span>
+            <span class="nav-desc">Interactive Scenarios & Histograms</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-tab="tab-results">
+          <span class="nav-icon">📊</span>
+          <div class="nav-text">
+            <span class="nav-title">5. Evaluation & Results</span>
+            <span class="nav-desc">Benchmarks & CSV Exporter</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-tab="tab-hardware">
+          <span class="nav-icon">🔌</span>
+          <div class="nav-text">
+            <span class="nav-title">6. Hardware & Motors</span>
+            <span class="nav-desc">Serial Bus & Pinout Tester</span>
+          </div>
+        </button>
+
+        <button class="nav-item" data-tab="tab-report">
+          <span class="nav-icon">📖</span>
+          <div class="nav-text">
+            <span class="nav-title">7. Documentation & Q&A</span>
+            <span class="nav-desc">Searchable Technical FAQs</span>
+          </div>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="rover-info-card">
+          <div class="rover-avatar">4WD</div>
+          <div>
+            <div class="rover-name">Autonomous UGV Model</div>
+            <div class="rover-sub">Monocular Vision Prototype</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main class="content-viewport">
+
+      <!-- ============================================================ -->
+      <!-- MODULE 1: VISION & NAVIGATION LIVE HUD                       -->
+      <!-- ============================================================ -->
+      <section class="tab-pane active" id="tab-vision">
+        <div class="pane-header">
+          <div>
+            <h2>Module 1: Real-Time Vision & Navigation HUD (Synchronized Tri-Stream)</h2>
+            <p>Live monocular perception showing (a) Input RGB Frame, (b) Lower 58% ROI Binary Mask, and (c) Augmented Navigation HUD with lookahead vector and steering decisions.</p>
+          </div>
+          <div class="pane-actions">
+            <label for="clip-selector">Select Scenario:</label>
+            <select id="clip-selector" class="select-input">
+              <option value="test_clips/sunny_curved_trail.mp4">Scenario 1: Sunny Curved Trail (200 frames)</option>
+              <option value="test_clips/shadowed_gravel_path.mp4">Scenario 2: Shadowed Gravel Path (200 frames)</option>
+              <option value="test_clips/sharp_switchback.mp4">Scenario 3: Sharp Switchback (200 frames)</option>
+              <option value="outdoor_video.mp4">Recorded Outdoor Field Test</option>
+            </select>
+            <button class="btn btn-primary" id="btn-stream-restart">Restart Clip</button>
+          </div>
+        </div>
+
+        <!-- 3-Panel Visual Demo -->
+        <div class="figure5-grid">
+          <!-- Panel A: Input RGB Frame -->
+          <div class="card panel-preview-card">
+            <div class="card-header-bar">
+              <span class="tag">(a) INPUT RGB FRAME (640x480)</span>
+              <span class="badge badge-info" id="badge-scen-name">Sunny Curved Trail</span>
+            </div>
+            <div class="preview-img-box">
+              <img id="view-input-frame" src="/stream?view=raw" alt="Input RGB Frame" class="preview-img" onerror="this.src='test_clips/preview_sunny.jpg'">
+              <div class="roi-indicator-box">
+                <div class="roi-line-tag">ROI HORIZON (42% Cutoff) &darr;</div>
+              </div>
+            </div>
+            <div class="panel-caption">Upper 42% sky/horizon excluded; lower 58% ground plane retained for tracking.</div>
+          </div>
+
+          <!-- Panel B: Lower ROI Binary Mask -->
+          <div class="card panel-preview-card">
+            <div class="card-header-bar">
+              <span class="tag">(b) LOWER ROI BINARY MASK</span>
+              <span class="badge badge-success">LAB CLAHE + HSV</span>
+            </div>
+            <div class="preview-img-box">
+              <img id="view-mask-frame" src="/stream?view=mask" alt="Lower ROI Binary Mask" class="preview-img" onerror="this.src='outputs/simulation_preview.png'">
+            </div>
+            <div class="panel-caption">Traversable dirt/gravel trail isolated after 5x5 Morphological Open and Close.</div>
+          </div>
+
+          <!-- Panel C: Augmented Navigation HUD -->
+          <div class="card panel-preview-card">
+            <div class="card-header-bar">
+              <span class="tag">(c) ANNOTATED NAVIGATION HUD</span>
+              <span class="badge badge-success" id="inst-status-badge">PATH LOCKED</span>
+            </div>
+            <div class="preview-img-box stream-container">
+              <img id="mjpeg-stream" src="/stream?view=hud" alt="Live Navigation HUD Stream" class="preview-img" onerror="this.src='outputs/simulation_preview.png'">
+              
+              <!-- Dynamic Fallback HUD Overlay for Client Mode -->
+              <div class="hud-overlay" id="hud-overlay">
+                <div class="hud-badge-container">
+                  <div class="hud-decision-badge badge-forward" id="hud-decision">TURN RIGHT</div>
+                  <div class="hud-state-text" id="hud-state">STATE: PATH_FOUND</div>
+                  <div class="hud-stat-line">Error: <strong id="hud-err">+0.197</strong> | Conf: <strong id="hud-conf">82%</strong></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-caption">Green corridor overlay, red centroid dot, yellow lookahead ray, and deadband gauge.</div>
+          </div>
+        </div>
+
+        <!-- Telemetry & Playback Bar -->
+        <div class="card playback-telemetry-card">
+          <div class="telemetry-bar-layout">
+            <!-- Steering Decision Hero -->
+            <div class="decision-pill-box decision-forward" id="inst-decision-box">
+              <span class="decision-icon" id="inst-decision-icon">➡</span>
+              <div>
+                <div class="decision-title" id="inst-decision-text">TURN RIGHT</div>
+                <div class="decision-subtitle" id="inst-decision-sub">Correcting toward right trail boundary (anticipation bias)</div>
+              </div>
+            </div>
+
+            <!-- Error Gauge -->
+            <div class="gauge-column">
+              <div class="inst-header">
+                <span>NORMALIZED CENTER ERROR (e)</span>
+                <strong id="inst-error-val">+0.197</strong>
+              </div>
+              <div class="gauge-bar">
+                <div class="gauge-deadband" style="left: 42%; width: 16%;"></div>
+                <div class="gauge-center-line"></div>
+                <div class="gauge-pin" id="inst-error-pin" style="left: 59.8%;"></div>
+              </div>
+              <div class="gauge-scale">
+                <span>-1.0 (HARD LEFT)</span>
+                <span class="gauge-center-tag">0.0 (DEADBAND &plusmn;0.08)</span>
+                <span>+1.0 (HARD RIGHT)</span>
+              </div>
+            </div>
+
+            <!-- Heading & Confidence -->
+            <div class="mini-kpi-col">
+              <div class="mini-kpi-box">
+                <span class="lbl">LOOKAHEAD HEADING (&theta;)</span>
+                <strong class="val" id="inst-heading-val">+14.2°</strong>
+              </div>
+              <div class="mini-kpi-box">
+                <span class="lbl">DETECTION CONFIDENCE</span>
+                <strong class="val color-green" id="inst-conf-val">82%</strong>
+              </div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="ctrl-col">
+              <button class="btn-icon" id="btn-play-pause" title="Play/Pause">⏸</button>
+              <span class="timeline-time" id="frame-counter">Frame 25 / 200</span>
+              <div class="speed-group">
+                <button class="btn-sm" id="btn-slow-mo">0.5x</button>
+                <button class="btn-sm active" id="btn-normal-speed">1.0x</button>
+                <button class="btn-sm" id="btn-fast-speed">2.0x</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- MODULE 2: 3D ROVER DIGITAL TWIN & SIMULATION                -->
+      <!-- ============================================================ -->
+      <section class="tab-pane" id="tab-twin">
+        <div class="pane-header">
+          <div>
+            <h2>Module 2: 3D Autonomous Rover Simulation & Digital Twin</h2>
+            <p>Interactive Three.js WebGL simulation with 4WD skid-steer chassis, rotating wheels, camera mast, and sensor FOV cone projecting the 42% ROI ground boundary.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-twin-auto">Toggle Autonomous Drive</button>
+            <button class="btn" id="btn-twin-cam">Change Camera View</button>
+            <button class="btn" id="btn-twin-reset">Reset Position</button>
+          </div>
+        </div>
+
+        <div class="twin-grid">
+          <div class="card canvas-card">
+            <div id="three-canvas-container" class="three-container"></div>
+            
+            <div class="twin-hud-overlay">
+              <div class="twin-hud-item">
+                <span class="hud-label">DRIVE MODE</span>
+                <span class="hud-val color-blue" id="twin-mode-text">AUTONOMOUS</span>
+              </div>
+              <div class="twin-hud-item">
+                <span class="hud-label">SPEED</span>
+                <span class="hud-val" id="twin-speed-val">1.2 m/s</span>
+              </div>
+              <div class="twin-hud-item">
+                <span class="hud-label">STEERING</span>
+                <span class="hud-val" id="twin-steer-text">STRAIGHT</span>
+              </div>
+              <div class="twin-hud-item">
+                <span class="hud-label">FOV SENSOR CONE</span>
+                <span class="hud-val">72° Monocular</span>
+              </div>
+            </div>
+
+            <!-- Manual On-Screen D-Pad -->
+            <div class="dpad-container" id="dpad-box">
+              <button class="dpad-btn dpad-up" id="dpad-up">▲</button>
+              <div class="dpad-middle">
+                <button class="dpad-btn dpad-left" id="dpad-left">◀</button>
+                <button class="dpad-btn dpad-stop" id="dpad-stop">■</button>
+                <button class="dpad-btn dpad-right" id="dpad-right">▶</button>
+              </div>
+              <button class="dpad-btn dpad-down" id="dpad-down">▼</button>
+            </div>
+          </div>
+
+          <div class="card twin-specs-card">
+            <div class="card-header-bar">
+              <span class="tag">4WD UGV CHASSIS SPECIFICATIONS</span>
+            </div>
+
+            <div class="spec-list">
+              <div class="spec-row">
+                <span class="spec-k">Locomotion Type</span>
+                <span class="spec-v">4-Wheel Skid-Steer (Differential)</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Dimensions (L × W × H)</span>
+                <span class="spec-v">420 × 280 × 220 mm</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Wheel Diameter / Width</span>
+                <span class="spec-v">130 mm / 60 mm</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Ground Clearance</span>
+                <span class="spec-v">55 mm</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Camera Pitch Angle</span>
+                <span class="spec-v">18° Downward Tilt</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">ROI Ground Cutoff</span>
+                <span class="spec-v">42% (Lower 58% analyzed)</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-k">Drive Motors</span>
+                <span class="spec-v">4 × 12V 250 RPM High-Torque DC</span>
+              </div>
+            </div>
+
+            <div class="guide-box">
+              <h4>Interactive Controls</h4>
+              <p>&bull; <strong>W / A / S / D</strong> or Arrow keys to drive manually.</p>
+              <p>&bull; <strong>Left-Click Drag</strong> to orbit camera.</p>
+              <p>&bull; <strong>Right-Click Drag</strong> to pan.</p>
+              <p>&bull; <strong>Scroll Wheel</strong> to zoom.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- MODULE 3: PERCEPTION PIPELINE & INTERACTIVE TUNER           -->
+      <!-- ============================================================ -->
+      <section class="tab-pane" id="tab-methodology">
+        <div class="pane-header">
+          <div>
+            <h2>Module 3: Perception Pipeline & Interactive Parameter Tuner</h2>
+            <p>Four-stage modular software pipeline with live real-time OpenCV parameter adjustment sliders.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-reset-params">Reset Default Parameters</button>
+          </div>
+        </div>
+
+        <!-- 4-Stage Architecture Flow with Clickable Inspectors -->
+        <div class="card fig4-architecture-card">
+          <div class="card-header-bar">
+            <span class="tag">FOUR-STAGE MODULAR SOFTWARE PIPELINE (CLICK ANY STAGE TO INSPECT CODE)</span>
+          </div>
+
+          <div class="pipeline-flow-diagram">
+            <div class="pipe-box pipe-stage1 active-pipe" id="pbox-1" onclick="inspectStage(1)">
+              <div class="pipe-num">STAGE 1</div>
+              <div class="pipe-name">1. Video Input</div>
+              <ul class="pipe-list">
+                <li>640x480 Frame Capture</li>
+                <li>Lower 58% ROI Crop</li>
+                <li>Eliminates sky noise</li>
+              </ul>
+            </div>
+
+            <div class="pipe-arrow">&rarr;</div>
+
+            <div class="pipe-box pipe-stage2" id="pbox-2" onclick="inspectStage(2)">
+              <div class="pipe-num">STAGE 2</div>
+              <div class="pipe-name">2. Perception</div>
+              <ul class="pipe-list">
+                <li>LAB CLAHE Shadow Equalization</li>
+                <li>HSV Color Thresholding</li>
+                <li>Morphological Open & Close</li>
+              </ul>
+            </div>
+
+            <div class="pipe-arrow">&rarr;</div>
+
+            <div class="pipe-box pipe-stage3" id="pbox-3" onclick="inspectStage(3)">
+              <div class="pipe-num">STAGE 3</div>
+              <div class="pipe-name">3. Path Geometry</div>
+              <ul class="pipe-list">
+                <li>Bottom-Anchored Filtering</li>
+                <li>Centroid: cx = M10 / M00</li>
+                <li>Lookahead Heading Angle &theta;</li>
+              </ul>
+            </div>
+
+            <div class="pipe-arrow">&rarr;</div>
+
+            <div class="pipe-box pipe-stage4" id="pbox-4" onclick="inspectStage(4)">
+              <div class="pipe-num">STAGE 4</div>
+              <div class="pipe-name">4. Navigation & HUD</div>
+              <ul class="pipe-list">
+                <li>4-State State Machine</li>
+                <li>Deadband Filter (&plusmn;0.08)</li>
+                <li>Annotated HUD & CSV Export</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Dynamic Stage Inspector Box -->
+          <div class="stage-inspector-display" id="stage-inspector-display">
+            <h4 id="insp-title">Stage 1: Ground Region of Interest (ROI) Isolation</h4>
+            <p id="insp-desc">Crops the lower 58% of the incoming frame (rows 202 to 480). This eliminates sky and horizon foliage, reducing compute load by 42%.</p>
+            <pre class="code-box"><code id="insp-code"># Implementation in perception.py:
+h, w = frame.shape[:2]
+roi_y = int(h * 0.42)  # 42% horizon cutoff
+roi = frame[roi_y:, :]  # Lower 58% ground plane</code></pre>
+          </div>
+        </div>
+
+        <!-- Interactive Sliders / Parameter Playground -->
+        <div class="card param-tuning-card">
+          <div class="card-header-bar">
+            <span class="tag">LIVE PERCEPTION TUNER (UPDATES LIVE BACKEND OPENCV THRESHOLDS)</span>
+            <span class="badge badge-info" id="tuner-status-badge">Live Sync Active</span>
+          </div>
+
+          <div class="sliders-grid">
+            <!-- HSV Lower -->
+            <div class="slider-group">
+              <label>HSV Lower Hue (H_min): <span id="val-hmin">0</span></label>
+              <input type="range" id="slider-hmin" min="0" max="180" value="0">
+            </div>
+            <div class="slider-group">
+              <label>HSV Lower Sat (S_min): <span id="val-smin">0</span></label>
+              <input type="range" id="slider-smin" min="0" max="255" value="0">
+            </div>
+            <div class="slider-group">
+              <label>HSV Lower Val (V_min): <span id="val-vmin">35</span></label>
+              <input type="range" id="slider-vmin" min="0" max="255" value="35">
+            </div>
+
+            <!-- HSV Upper -->
+            <div class="slider-group">
+              <label>HSV Upper Hue (H_max): <span id="val-hmax">180</span></label>
+              <input type="range" id="slider-hmax" min="0" max="180" value="180">
+            </div>
+            <div class="slider-group">
+              <label>HSV Upper Sat (S_max): <span id="val-smax">100</span></label>
+              <input type="range" id="slider-smax" min="0" max="255" value="100">
+            </div>
+            <div class="slider-group">
+              <label>HSV Upper Val (V_max): <span id="val-vmax">230</span></label>
+              <input type="range" id="slider-vmax" min="0" max="255" value="230">
+            </div>
+
+            <!-- Min Area & Deadband -->
+            <div class="slider-group">
+              <label>Min Contour Area: <span id="val-area">1500 px</span></label>
+              <input type="range" id="slider-area" min="500" max="10000" step="100" value="1500">
+            </div>
+            <div class="slider-group">
+              <label>Deadband Threshold: <span id="val-db">&plusmn; 0.08</span></label>
+              <input type="range" id="slider-db" min="0.02" max="0.25" step="0.01" value="0.08">
+            </div>
+            <div class="slider-group">
+              <label>ROI Horizon Cutoff: <span id="val-roi">42%</span></label>
+              <input type="range" id="slider-roi" min="20" max="70" step="1" value="42">
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- MODULE 4: DATASET & EDA (INTERACTIVE CLICKABLE SCENARIOS)   -->
+      <!-- ============================================================ -->
+      <section class="tab-pane" id="tab-eda">
+        <div class="pane-header">
+          <div>
+            <h2>Module 4: Dataset & Exploratory Data Analysis (EDA)</h2>
+            <p>Interactive 600-frame outdoor benchmark. Click any scenario card to inspect its characteristics and load its preview.</p>
+          </div>
+          <div class="pane-actions">
+            <span class="badge badge-info" id="eda-active-scen-tag">Active: Scenario 1 (Sunny Trail)</span>
+          </div>
+        </div>
+
+        <!-- 3 Interactive Clickable Scenarios Preview -->
+        <div class="card eda-fig1-card">
+          <div class="card-header-bar">
+            <span class="tag">SELECT A SCENARIO TO LOAD DATA & CHARTS:</span>
+          </div>
+
+          <div class="scenarios-preview-grid">
+            <div class="scenario-thumb-card active-scen" id="scen-card-1" onclick="selectEdaScenario(1)">
+              <div class="scen-header">
+                <h4>Scenario 1: Sunny Curved Trail</h4>
+                <span class="badge badge-success">Selected</span>
+              </div>
+              <div class="thumb-box thumb-sunny">
+                <div class="thumb-sky"></div>
+                <div class="thumb-ground">
+                  <div class="thumb-trail trail-sunny"></div>
+                </div>
+              </div>
+              <p>Gentle S-curve dirt/gravel trail under uniform sunlight. High contrast road boundary with 73.0% consistency.</p>
+            </div>
+
+            <div class="scenario-thumb-card" id="scen-card-2" onclick="selectEdaScenario(2)">
+              <div class="scen-header">
+                <h4>Scenario 2: Shadowed Gravel Path</h4>
+                <span class="badge badge-info">Click to Load</span>
+              </div>
+              <div class="thumb-box thumb-shadow">
+                <div class="thumb-sky"></div>
+                <div class="thumb-ground">
+                  <div class="thumb-trail trail-shadow"></div>
+                  <div class="shadow-band band1"></div>
+                  <div class="shadow-band band2"></div>
+                </div>
+              </div>
+              <p>Diagonal dark tree-shadow bands (35% alpha occlusion). Demonstrates LAB CLAHE shadow recovery (RMSE 0.510).</p>
+            </div>
+
+            <div class="scenario-thumb-card" id="scen-card-3" onclick="selectEdaScenario(3)">
+              <div class="scen-header">
+                <h4>Scenario 3: Sharp Switchback</h4>
+                <span class="badge badge-info">Click to Load</span>
+              </div>
+              <div class="thumb-box thumb-switch">
+                <div class="thumb-sky"></div>
+                <div class="thumb-ground">
+                  <div class="thumb-trail trail-switch"></div>
+                </div>
+              </div>
+              <p>High-curvature switchback bend. Demonstrates lookahead anticipation and safe STOP recovery when path exits FOV.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid with Interactive Mode Toggles -->
+        <div class="charts-two-col">
+          <div class="card">
+            <div class="card-header-bar">
+              <span class="tag">PIXEL INTENSITY DISTRIBUTIONS</span>
+              <div class="view-toggle-group">
+                <button class="btn-toggle active" id="btn-chart-both" onclick="setFig2Mode('both')">All Channels</button>
+                <button class="btn-toggle" id="btn-chart-lab" onclick="setFig2Mode('lab')">LAB Luminance</button>
+                <button class="btn-toggle" id="btn-chart-hsv" onclick="setFig2Mode('hsv')">HSV Saturation</button>
+              </div>
+            </div>
+            <canvas id="chart-fig2-dist" height="220"></canvas>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-color color-blue"></span> Sunny Trail (L: 70–80)</span>
+              <span class="legend-item"><span class="legend-color" style="background:#64748b"></span> Shadowed Gravel (L: 40–55)</span>
+              <span class="legend-item"><span class="legend-color color-orange"></span> Trail Saturation (S ~ 60)</span>
+            </div>
+            <p class="chart-caption" id="fig2-caption">
+              <strong>Key Finding:</strong> Tree shadows depress LAB Luminance down to 40–55, while HSV Saturation remains tightly clustered near 60 for trail vs 130–160 for grass.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header-bar">
+              <span class="tag">TARGET DECISION DISTRIBUTION (600 FRAMES)</span>
+              <span class="badge badge-info">Curved Trail Geometry</span>
+            </div>
+            <canvas id="chart-fig3-decisions" height="220"></canvas>
+            <div class="decision-breakdown-tags">
+              <span class="dec-tag" style="border-color:#f97316; color:#f97316">TURN RIGHT: 237 (39.5%)</span>
+              <span class="dec-tag" style="border-color:#64748b; color:#94a3b8">STOP/UNCERTAIN: 185 (30.8%)</span>
+              <span class="dec-tag" style="border-color:#0284c7; color:#38bdf8">TURN LEFT: 166 (27.7%)</span>
+              <span class="dec-tag" style="border-color:#10b981; color:#10b981">FORWARD: 12 (2.0%)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- MODULE 5: RESULTS & BENCHMARKS (WITH ROW HIGHLIGHTS)         -->
+      <!-- ============================================================ -->
+      <section class="tab-pane" id="tab-results">
+        <div class="pane-header">
+          <div>
+            <h2>Module 5: Experimental Results & Quantitative Benchmarks</h2>
+            <p>Baseline (HSV-only) vs Proposed (LAB+HSV+Lookahead) across 600 frames. Click any row in Table 5 to highlight its metrics.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="btn-export-csv-results">Download Full 600-Frame CSV Telemetry</button>
+          </div>
+        </div>
+
+        <!-- Benchmark Table -->
+        <div class="card">
+          <div class="card-header-bar">
+            <span class="tag">QUANTITATIVE COMPARISON: BASELINE VS PROPOSED (CLICK ROW TO FILTER CHARTS)</span>
+            <span class="badge badge-success">83.0 FPS on CPU</span>
+          </div>
+
+          <table class="report-table" id="benchmark-table">
+            <thead>
+              <tr>
+                <th>Test Scenario</th>
+                <th>Method</th>
+                <th>Det. %</th>
+                <th>MAE</th>
+                <th>RMSE &darr;</th>
+                <th>Jitter &darr;</th>
+                <th>FPS &uarr;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="table-row-selectable" onclick="filterResultsScenario('sunny')">
+                <td rowspan="2"><strong>Sunny Curved Trail</strong><br>(200 frames)</td>
+                <td>Baseline (HSV-Only)</td>
+                <td>73.0%</td>
+                <td>0.4856</td>
+                <td>0.5402</td>
+                <td><strong>0.0306</strong></td>
+                <td><strong>200.5</strong></td>
+              </tr>
+              <tr class="row-highlight table-row-selectable" onclick="filterResultsScenario('sunny')">
+                <td><strong>Proposed (LAB+HSV+Lookahead)</strong></td>
+                <td><strong>73.0%</strong></td>
+                <td><strong>0.4746</strong></td>
+                <td><strong>0.5097</strong></td>
+                <td>0.0372</td>
+                <td>72.5</td>
+              </tr>
+
+              <tr class="table-row-selectable" onclick="filterResultsScenario('shadow')">
+                <td rowspan="2"><strong>Shadowed Gravel Path</strong><br>(200 frames)</td>
+                <td>Baseline (HSV-Only)</td>
+                <td>73.0%</td>
+                <td>0.4855</td>
+                <td>0.5400</td>
+                <td><strong>0.0306</strong></td>
+                <td><strong>201.3</strong></td>
+              </tr>
+              <tr class="row-highlight table-row-selectable" onclick="filterResultsScenario('shadow')">
+                <td><strong>Proposed (LAB+HSV+Lookahead)</strong></td>
+                <td><strong>73.0%</strong></td>
+                <td><strong>0.4751</strong></td>
+                <td><strong>0.5102</strong></td>
+                <td>0.0373</td>
+                <td>67.9</td>
+              </tr>
+
+              <tr class="table-row-selectable" onclick="filterResultsScenario('switchback')">
+                <td rowspan="2"><strong>Sharp Switchback</strong><br>(200 frames)</td>
+                <td>Baseline (HSV-Only)</td>
+                <td>54.5%</td>
+                <td><strong>0.4169</strong></td>
+                <td><strong>0.5159</strong></td>
+                <td><strong>0.0408</strong></td>
+                <td><strong>198.6</strong></td>
+              </tr>
+              <tr class="row-highlight table-row-selectable" onclick="filterResultsScenario('switchback')">
+                <td><strong>Proposed (LAB+HSV+Lookahead)</strong></td>
+                <td><strong>54.5%</strong></td>
+                <td>0.4841</td>
+                <td>0.5586</td>
+                <td>0.0487</td>
+                <td>72.8</td>
+              </tr>
+
+              <tr class="row-total table-row-selectable" onclick="filterResultsScenario('all')">
+                <td rowspan="2"><strong>Overall Average</strong><br>(600 frames total)</td>
+                <td>Baseline (HSV-Only)</td>
+                <td>66.8%</td>
+                <td><strong>0.4669</strong></td>
+                <td>0.5336</td>
+                <td><strong>0.0381</strong></td>
+                <td><strong>206.6</strong></td>
+              </tr>
+              <tr class="row-total row-highlight table-row-selectable" onclick="filterResultsScenario('all')">
+                <td><strong>Proposed (LAB+HSV+Lookahead)</strong></td>
+                <td><strong>66.8%</strong></td>
+                <td>0.4774</td>
+                <td><strong>0.5236</strong></td>
+                <td>0.0454</td>
+                <td>83.0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-two-col">
+          <div class="card">
+            <div class="card-header-bar">
+              <span class="tag">CROSS-TRACK CENTER ERROR RMSE COMPARISON</span>
+            </div>
+            <canvas id="chart-fig6-rmse" height="220"></canvas>
+            <p class="chart-caption">
+              <strong>Evaluation Finding:</strong> Proposed method lowers RMSE from 0.540 to 0.510 on curved and shadowed gravel trails (-5.6% error reduction) via lookahead heading fusion.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-header-bar">
+              <span class="tag">PERCEPTION FAILURE BREAKDOWN (199 FRAMES)</span>
+            </div>
+            <canvas id="chart-fig7-failures" height="220"></canvas>
+            <div class="failure-stat-box">
+              <div class="f-item">
+                <span class="f-num color-red">180 frames</span>
+                <span class="f-lbl">NO_CANDIDATE_PIXELS (Switchback Exits)</span>
+              </div>
+              <div class="f-item">
+                <span class="f-num color-orange">19 frames</span>
+                <span class="f-lbl">CONTOUR_BELOW_MIN_AREA (&lt; 1,500 px)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- MODULE 6: HARDWARE & MOTOR BRIDGE (WITH MOTOR ANIMATION)     -->
+      <!-- ============================================================ -->
+      <section class="tab-pane" id="tab-hardware">
+        <div class="pane-header">
+          <div>
+            <h2>Module 6: Hardware Interfacing & Motor Controller</h2>
+            <p>Translating high-level Python steering decisions to physical motor driver signals via USB Serial and L298N Dual H-Bridge.</p>
+          </div>
+        </div>
+
+        <div class="hardware-grid">
+          <div class="card wiring-card">
+            <div class="card-header-bar">
+              <span class="tag">ARDUINO UNO &harr; L298N MOTOR DRIVER PINOUT</span>
+              <span class="badge badge-success">5V TTL Serial (9600)</span>
+            </div>
+
+            <table class="pinout-table">
+              <thead>
+                <tr>
+                  <th>Arduino Pin</th>
+                  <th>L298N Pin</th>
+                  <th>Function</th>
+                  <th>Signal Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="pin-row-in1">
+                  <td><code>Pin 8</code></td>
+                  <td><code>IN1</code></td>
+                  <td>Left Motors Forward</td>
+                  <td>Digital Output</td>
+                </tr>
+                <tr id="pin-row-in2">
+                  <td><code>Pin 9</code></td>
+                  <td><code>IN2</code></td>
+                  <td>Left Motors Backward</td>
+                  <td>Digital Output</td>
+                </tr>
+                <tr id="pin-row-in3">
+                  <td><code>Pin 10</code></td>
+                  <td><code>IN3</code></td>
+                  <td>Right Motors Forward</td>
+                  <td>Digital Output</td>
+                </tr>
+                <tr id="pin-row-in4">
+                  <td><code>Pin 11</code></td>
+                  <td><code>IN4</code></td>
+                  <td>Right Motors Backward</td>
+                  <td>Digital Output</td>
+                </tr>
+                <tr>
+                  <td><code>Pin 5 (PWM)</code></td>
+                  <td><code>ENA</code></td>
+                  <td>Left Speed (0–255)</td>
+                  <td>Analog PWM</td>
+                </tr>
+                <tr>
+                  <td><code>Pin 6 (PWM)</code></td>
+                  <td><code>ENB</code></td>
+                  <td>Right Speed (0–255)</td>
+                  <td>Analog PWM</td>
+                </tr>
+                <tr>
+                  <td><code>GND</code></td>
+                  <td><code>GND</code></td>
+                  <td>Common System Ground</td>
+                  <td>Power Reference</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Live Serial Monitor & Motor Visualizer -->
+            <div class="serial-terminal-box">
+              <div class="terminal-header">
+                <span>SERIAL PACKET STREAM (9600 BAUD)</span>
+                <span class="badge badge-success" id="term-status-badge">READY</span>
+              </div>
+              <div class="terminal-logs" id="terminal-logs">
+                <div class="term-line"><span class="term-time">[00:00:01]</span> <span class="term-cmd">TX -> 'F'</span> : FORWARD (Speed: 180)</div>
+                <div class="term-line"><span class="term-time">[00:00:02]</span> <span class="term-cmd">TX -> 'R'</span> : TURN RIGHT (L: 160, R: -160)</div>
+                <div class="term-line"><span class="term-time">[00:00:04]</span> <span class="term-cmd">TX -> 'F'</span> : FORWARD (Speed: 180)</div>
+              </div>
+
+              <!-- Motor State Visualizer Indicator -->
+              <div class="motor-state-indicator-bar">
+                <div class="motor-unit">
+                  <span class="m-lbl">LEFT MOTORS (ENA: <span id="m-left-pwm">180</span>)</span>
+                  <div class="wheel-spin-anim spin-forward" id="wheel-left">⚙️ Forward</div>
+                </div>
+                <div class="motor-unit">
+                  <span class="m-lbl">RIGHT MOTORS (ENB: <span id="m-right-pwm">180</span>)</span>
+                  <div class="wheel-spin-anim spin-forward" id="wheel-right">⚙️ Forward</div>
+                </div>
+              </div>
+
+              <div class="terminal-test-bar">
+                <span>Transmit Test Command:</span>
+                <button class="btn-sm" onclick="sendSerialTest('F')">'F' Forward</button>
+                <button class="btn-sm" onclick="sendSerialTest('L')">'L' Left</button>
+                <button class="btn-sm" onclick="sendSerialTest('R')">'R' Right</button>
+                <button class="btn-sm btn-danger-sm" onclick="sendSerialTest('S')">'S' Stop</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card code-card">
+            <div class="card-header-bar">
+              <span class="tag">ugv_arduino_motor_controller.ino</span>
+              <button class="btn-sm" id="btn-copy-code" onclick="copyArduinoCode()">Copy Code</button>
+            </div>
+            <pre class="code-box"><code id="arduino-c-code">// --- L298N Skid-Steer Firmware with 600ms Watchdog ---
+const int IN1 = 8, IN2 = 9;   // Left Motors
+const int IN3 = 10, IN4 = 11; // Right Motors
+const int ENA = 5, ENB = 6;   // PWM Speed
+
+unsigned long lastTime = 0;
+const unsigned long TIMEOUT = 600; // Auto-stop watchdog
+
+void setup() {
+  pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+  pinMode(ENA, OUTPUT); pinMode(ENB, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available()) {
+    char cmd = Serial.read();
+    lastTime = millis();
+    if (cmd == 'F') moveForward();
+    else if (cmd == 'L') turnLeft();
+    else if (cmd == 'R') turnRight();
+    else stopMotors();
+  }
+  // Safety watchdog stop if packets halt
+  if (millis() - lastTime > TIMEOUT) stopMotors();
+}
+
+void moveForward() {
+  analogWrite(ENA, 180); analogWrite(ENB, 180);
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void turnLeft() {
+  analogWrite(ENA, 160); analogWrite(ENB, 160);
+  digitalWrite(IN1, LOW);  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void turnRight() {
+  analogWrite(ENA, 160); analogWrite(ENB, 160);
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);  digitalWrite(IN4, HIGH);
+}
+
+void stopMotors() {
+  analogWrite(ENA, 0); analogWrite(ENB, 0);
+  digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- MODULE 7: SYSTEM DOCUMENTATION & SEARCHABLE FAQS             -->
+      <!-- ============================================================ -->
+      <section class="tab-pane" id="tab-report">
+        <div class="pane-header">
+          <div>
+            <h2>Module 7: System Architecture & Technical FAQs</h2>
+            <p>Design principles, algorithmic derivations, and searchable technical questions & answers.</p>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-sm" id="btn-expand-all" onclick="toggleAllFaqs(true)">Expand All</button>
+            <button class="btn btn-sm" id="btn-collapse-all" onclick="toggleAllFaqs(false)">Collapse All</button>
+          </div>
+        </div>
+
+        <div class="report-container">
+          <!-- Search Bar for FAQs -->
+          <div class="card faq-search-card">
+            <div class="faq-search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="faq-search-input" placeholder="Search technical topics (e.g., 'HSV', 'deadband', 'ROI', 'moments', 'Arduino')..." oninput="filterFaqs()">
+            </div>
+          </div>
+
+          <!-- Top 8 Technical Q&A Accordion -->
+          <div class="viva-accordion" id="faq-accordion-list">
+            <div class="viva-item" data-keywords="hsv bgr rgb colour color space lab clahe shadow">
+              <button class="viva-question">
+                <span>Q1. Why convert BGR frames to both HSV and CIE LAB colour spaces instead of standard RGB?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                RGB couples chromaticity and luminance across all three channels. When clouds pass or tree shadows fall, R, G, and B all drop drastically, breaking thresholding. In HSV, Hue and Saturation isolate pure colour from brightness, while CIE LAB isolates perceptual luminance in the L-channel so CLAHE can normalize harsh tree shadows without distorting trail colour.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="baseline proposed rmse evaluation table performance">
+              <button class="viva-question">
+                <span>Q2. How did the proposed method improve upon the baseline in quantitative evaluation?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                While maintaining 73.0% path detection consistency on shadowed gravel trails, adding LAB CLAHE shadow compensation and lookahead heading fusion reduced cross-track RMSE from 0.5400 to 0.5102 (-5.6% error reduction) and achieved 83.0 FPS average processing speed on a standard CPU.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="bottom anchored contour ground roi bumper proximity wheels">
+              <button class="viva-question">
+                <span>Q3. Why is bottom-anchored contour selection crucial for an outdoor ground rover?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                A ground rover must follow the terrain directly touching its front wheels. If we only selected the largest contour by area, a distant clearing or background tree opening with similar colour could hijack the steering. Anchoring to the lowest 20% of the ROI ensures continuous contiguous path following.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="deadband grace period state machine fsm oscillation chattering">
+              <button class="viva-question">
+                <span>Q4. What is the role of the &plusmn;0.08 deadband and 5-frame uncertainty grace period?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                The &plusmn;0.08 deadband establishes a neutral zone around zero error to prevent high-frequency LEFT/RIGHT motor chattering on straight paths. The 5-frame grace period in PATH_UNCERTAIN holds the last safe steering angle during momentary shadow flicker before safely triggering STOP_NO_PATH if the trail is truly lost.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="spatial moments m00 m10 m01 centroid center math formula">
+              <button class="viva-question">
+                <span>Q5. How do Image Moments calculate the path centroid (cx, cy)?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                Using spatial image moments via cv2.moments(): M00 represents the total segmented pixel area, while M10 and M01 represent the weighted pixel coordinate sums along the X and Y axes. The centroid is obtained through cx = M10 / M00 and cy = M01 / M00.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="switchback failure stop no candidate pixels fov exit">
+              <button class="viva-question">
+                <span>Q6. What causes perception failure on the Sharp Switchback scenario?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                During extreme switchback hairpin bends, the trail curves beyond the monocular camera's horizontal field of view in the lower 58% ROI. Because open-loop benchmark video playback cannot steer the camera back onto the trail, the path temporarily exits the frame, triggering NO_CANDIDATE_PIXELS and a safe STOP_NO_PATH transition.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="arduino serial protocol usb l298n motor driver watchdog timeout">
+              <button class="viva-question">
+                <span>Q7. How does Python communicate with the physical rover chassis?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                Python writes 1-byte ASCII characters ('F', 'L', 'R', 'S') via USB Serial at 9600 baud to an onboard Arduino Uno. The Arduino reads the character and sets the digital logic (IN1–IN4) and PWM pins (ENA, ENB) of an L298N Dual H-Bridge to drive 4 DC geared motors. A 600ms watchdog timer auto-stops the rover if serial packets halt.
+              </div>
+            </div>
+
+            <div class="viva-item" data-keywords="limitations safety ethical obstacle avoidance 3d lidar depth">
+              <button class="viva-question">
+                <span>Q8. What are the key limitations and safety mitigations of this prototype?</span>
+                <span class="viva-arrow">&#9662;</span>
+              </button>
+              <div class="viva-answer">
+                Limitations: 2D colour-only segmentation cannot detect 3D positive obstacles (like brown logs) sharing path colour. Safety mitigations: Autonomous failsafe stops when confidence &lt; 0.30, physical watchdog timers, local edge computation without storing facial video for privacy, and strict commitment to non-weaponized search/rescue and agricultural robotics.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
